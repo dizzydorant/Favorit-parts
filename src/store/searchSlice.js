@@ -1,16 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const BASE_URL = import.meta.env.DEV
-  ? "/hs/hsprice/"
-  : "https://favorit-parts.ru";
-
 export const fetchBrandsByNumber = createAsyncThunk(
   "search/fetchBrands",
   async ({ apiKey, number }, { rejectWithValue }) => {
     try {
       const cleanNumber = encodeURIComponent(number.trim());
       const response = await fetch(
-        `${BASE_URL}?key=${apiKey}&number=${cleanNumber}`,
+        `/hs/hsprice/?key=${apiKey}&number=${cleanNumber}`,
       );
 
       if (!response.ok) {
