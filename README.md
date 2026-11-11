@@ -1,16 +1,77 @@
-# React + Vite
+# Сервис «Проценка» — Клиентское приложение для подбора автозапчастей
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Клиентское веб-приложение на **React + Redux Toolkit**, разработанное для интеграции с внешним API-сервисом поиска автозапчастей и аналогов **Favorit Parts**. Интерфейс реализует двухэтапный процесс проценки номенклатуры с корректной обработкой складов, остатков и ошибок.
 
-Currently, two official plugins are available:
+## 🚀 Функциональные возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Этап 1 — Поиск производителей (брендов):**
+   - Ввод артикула (номера) автозапчасти с автоматическим URL-кодированием спецсимволов (`#`, `&`, пробелы и др.) согласно спецификации API.
+   - Вывод списка доступных производителей для выбора.
+2. **Этап 2 — Получение аналогов и предложений по складам:**
+   - Повторный запрос к API с передачей выбранного бренда и флагов `analogues=on` и `info=on`.
+   - Отображение итоговой таблицы с разделением на **Искомый оригинал** и **Аналоги**.
+   - Корректный расчет стоимости и остатков: данные извлекаются из массива складов (`warehouses`) для каждой конкретной позиции, а не из устаревшего корневого поля `price`.
+   - Отображение статуса возврата позиции (`notRefund`).
+3. **Настройка API-ключа:**
+   - Возможность указать индивидуальный GUID-ключ покупателя прямо в шапке интерфейса (по умолчанию подставлен тестовый ключ из документации).
+4. **Обработка состояний:**
+   - Индикаторы загрузки (спиннеры) на каждом этапе запроса.
+   - Обработка пустых ответов (когда деталь не найдена или отсутствует на складах) и текстовых ошибок от API (`Invalid key client!`, `Request quota exceeded!` и др.).
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠 Технологический стек
 
-## Expanding the Oxlint configuration
+- **React** (сборка на **Vite**) — компонентный подход, чистый JavaScript (без TypeScript).
+- **Redux Toolkit & React-Redux** — централизованное управление состоянием приложения и асинхронными запросами (`createAsyncThunk`).
+- **Bootstrap 5** — адаптивная сетка, компоненты форм, уведомления и таблицы.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+---
+
+## 📂 Структура проекта
+
+```text
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx       # Шапка приложения и управление API-ключом
+│   │   ├── SearchForm.jsx   # Форма ввода артикула (Этап 1)
+│   │   ├── BrandList.jsx    # Список найденных производителей (Этап 1)
+│   │   ├── PriceTable.jsx   # Таблица цен, остатков и аналогов (Этап 2)
+│   │   └── Footer.jsx       # Подвал приложения
+│   ├── store/
+│   │   ├── index.js         # Конфигурация Redux Store
+│   │   ├── searchSlice.js   # Слайс состояния поиска брендов и API-ключа
+│   │   └── detailsSlice.js  # Слайс состояния аналогов и предложений складов
+│   ├── App.jsx              # Корневой компонент-каркас
+│   └── main.jsx             # Точка входа, подключение Provider и Bootstrap
+├── vite.config.js           # Настройка dev-сервера и прокси для обхода CORS
+└── package.json
+```
+
+---
+
+## ⚙️ Установка и запуск локально
+
+1. **Клонируйте репозиторий и перейдите в папку проекта:**
+
+   ```bash
+   git clone <URL_вашего_репозитория>
+   cd <папка_проекта>
+   ```
+
+2. **Установите зависимости:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Запустите сервер разработки:**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Откройте приложение в браузере:**
+   Перейдите по адресу `http://localhost:5173`. Для проверки работы можно ввести тестовый артикул **`01089`** или **`7160500039S`**.
+
+> **Примечание по работе с API (CORS):** Для корректной работы локального стенда без блокировок браузера в файле `vite.config.js` настроен прокси-сервер для маршрута `/hs`, перенаправляющий запросы на `https://favorit-parts.ru`.
